@@ -35,7 +35,10 @@ if [ ! -f token ]; then
 fi
 
 if [ ! -f docker-compose.yaml ]; then
-    curl -Ls https://raw.githubusercontent.com/k3s-io/k3s/master/docker-compose.yml | sed -e 's/command: server/command: server --no-deploy traefik/' > docker-compose.yml
+    curl -Ls https://raw.githubusercontent.com/k3s-io/k3s/master/docker-compose.yml \
+        | sed -e 's/command: server/command: server --no-deploy traefik/' \
+        | sed -e 's/restart: always/restart: "no"/g' \
+        > docker-compose.yml
 fi
 
 export K3S_TOKEN=$(cat token)
@@ -46,13 +49,11 @@ case "$1" in
     docker-compose stop
     ;;
 "reset")
-    docker-compose stop
-    docker-compose rm
-    docker volume rm k3s_k3s-server
+    docker-compose down -v
+    rm -rf token kubeconfig.yaml docker-compose.yml
     ;;
 "rm")
-    docker-compose rm
-    docker volume rm k3s_k3s-server
+    docker-compose rm -s -v
     ;;
 "clean")
     clean
