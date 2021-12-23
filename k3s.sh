@@ -18,8 +18,13 @@ start() {
         echo "Unavailable"
         rm -f kubeconfig.yaml ~/.kube/config.k3s
         docker-compose up -d --scale agent=3
-        sleep 2
+	echo "Waiting for kubeconfig.yaml to be created . . ."
+	while ! test -f "kubeconfig.yaml"; do
+	    sleep 1
+	done
         cp kubeconfig.yaml ~/.kube/config.k3s
+	chmod 600 ~/.kube/config.k3s
+	echo "Done"
     fi
 }
 
